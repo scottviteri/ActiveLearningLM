@@ -2,6 +2,7 @@ from generate_formula import *
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from typing import Iterator, Tuple, List
 from tqdm import tqdm
+import bitsandbytes as bnb
 
 
 def generate_batched_question_answer_pairs(
@@ -182,13 +183,15 @@ def test_train_model():
         tokenizer.pad_token = tokenizer.eos_token
         model = AutoModelForCausalLM.from_pretrained("openai-community/gpt2").to(device)
     # Set up optimizer
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
+    optimizer = (torch.optim.AdamW if model_name == "gpt2" else bnb.optim.AdamW8bit)(
+        model.parameters(), lr=1e-5
+    )
 
     # Training parameters
     num_variables = 4
     num_clauses = 5
     num_batches = 100
-    batch_size = 64
+    batch_size = 64 if model_name == "gpt2" else 1
 
     # Create dataset iterator
     dataset_iterator = generate_batched_question_answer_pairs(
