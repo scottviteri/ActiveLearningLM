@@ -168,10 +168,19 @@ def test_train_model():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
+    # model_name = "gpt2"
+    model_name = "llama"
     # Mock model and tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("openai-community/gpt2")
-    tokenizer.pad_token = tokenizer.eos_token
-    model = AutoModelForCausalLM.from_pretrained("openai-community/gpt2").to(device)
+    if model_name == "llama":
+        tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3-8B")
+        tokenizer.pad_token = tokenizer.eos_token
+        model = AutoModelForCausalLM.from_pretrained("meta-llama/Meta-Llama-3-8B").to(
+            device
+        )
+    else:
+        tokenizer = AutoTokenizer.from_pretrained("openai-community/gpt2")
+        tokenizer.pad_token = tokenizer.eos_token
+        model = AutoModelForCausalLM.from_pretrained("openai-community/gpt2").to(device)
     # Set up optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
 
